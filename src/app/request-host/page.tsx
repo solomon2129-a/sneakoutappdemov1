@@ -1,55 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
 
 export default function RequestHostPage() {
-  const router = useRouter();
-  const { user, userProfile, loading } = useAuth();
   const [reason, setReason] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
     setIsLoading(true);
-    setError("");
 
     try {
-      await setDoc(doc(db, "hostRequests", user.id), {
-        userId: user.id,
-        userEmail: user.email,
-        userName: userProfile?.name || "Unknown",
-        reason,
-        status: "pending",
-        createdAt: new Date(),
-      });
-
+      // Mock submission
+      console.log("Host request submitted:", { reason });
       setSubmitted(true);
-      console.log("Request submitted, redirecting to /home");
       setTimeout(() => {
-        console.log("Navigating to /home after delay");
+        console.log("Redirecting to home");
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || "Failed to submit request");
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </main>
-    );
-  }
 
   if (submitted) {
     return (
@@ -83,12 +55,6 @@ export default function RequestHostPage() {
         <p className="text-gray-600 text-center mb-6">
           Tell us why you'd like to host events
         </p>
-
-        {error && (
-          <div className="bg-gray-100 border border-gray-300 text-gray-800 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

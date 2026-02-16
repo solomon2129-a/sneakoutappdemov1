@@ -1,14 +1,11 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 
 export default function ProviderProfile() {
-  const { user, userProfile, sector, loading, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    alert("Signed out (Demo)");
   };
 
   return (
@@ -31,13 +28,13 @@ export default function ProviderProfile() {
             <div>
               <p className="text-xs text-gray-600">Name</p>
               <p className="text-sm font-medium text-gray-900">
-                {userProfile?.name || "Provider"}
+                Demo Provider
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-600">Email</p>
               <p className="text-sm font-medium text-gray-900">
-                {userProfile?.email}
+                provider@demo.com
               </p>
             </div>
           </div>

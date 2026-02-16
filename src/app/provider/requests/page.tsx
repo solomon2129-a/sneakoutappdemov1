@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 
@@ -42,7 +41,6 @@ const MOCK_REQUESTS = [
 ];
 
 export default function ProviderRequests() {
-  const { user, sector, loading } = useAuth();
   const [requests, setRequests] = useState(MOCK_REQUESTS);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -55,14 +53,6 @@ export default function ProviderRequests() {
   const handleDecline = (id: number) => {
     setRequests(requests.filter((r) => r.id !== id));
   };
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-white pb-20">

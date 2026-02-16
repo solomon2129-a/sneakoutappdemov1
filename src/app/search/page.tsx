@@ -1,23 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 
 export default function SearchPage() {
-  const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Remove useEffect - demo mode has no auth requirement
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </main>
-    );
-  }
+  // Demo mode - no auth required
 
   return (
     <main className="min-h-screen bg-white pb-20">

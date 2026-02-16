@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 
@@ -39,8 +38,6 @@ const HISTORY = [
 ];
 
 export default function ProviderPerformance() {
-  const { user, sector, loading } = useAuth();
-
   // Demo mode - no auth required
 
   const totalEarnings = PAYOUTS.reduce((sum, p) => sum + p.amount, 0);

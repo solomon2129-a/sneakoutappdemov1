@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
 export type UserRole = "ATTENDEE" | "HOST" | "PROVIDER" | "ADMIN";
 export type Sector = "attendee" | "host" | "provider" | null;
@@ -38,8 +38,8 @@ const MOCK_USER: UserProfile = {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(MOCK_USER);
-  const [loading, setLoading] = useState(false);
+  const [user] = useState<UserProfile | null>(MOCK_USER);
+  const [loading] = useState(false);
   const [sector, setSector] = useState<Sector>("attendee");
 
   const handleSetSector = (newSector: Sector) => {
@@ -52,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     localStorage.removeItem("user");
     localStorage.removeItem("sector");
-    setUser(MOCK_USER);
     setSector("attendee");
   };
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 
@@ -23,52 +22,47 @@ interface BookingRequest {
   eventDate: string;
 }
 
+const MOCK_BOOKINGS: BookingRequest[] = [
+  {
+    id: "B1",
+    eventId: "EVT1",
+    event: {
+      id: "EVT1",
+      title: "Summer Music Festival",
+      startDate: "2025-06-15",
+      location: "Central Park",
+      host: { id: "H1", name: "Jane Host" },
+    },
+    offeredPrice: 1500,
+    status: "PENDING",
+    eventDate: "2025-06-15",
+  },
+  {
+    id: "B2",
+    eventId: "EVT2",
+    event: {
+      id: "EVT2",
+      title: "Tech Conference",
+      startDate: "2025-07-01",
+      location: "SF Convention Center",
+      host: { id: "H2", name: "John Tech" },
+    },
+    offeredPrice: 2000,
+    status: "ACCEPTED",
+    eventDate: "2025-07-01",
+  },
+];
+
 export default function ProviderCalendar() {
-  const { user, sector, loading } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [dateBookings, setDateBookings] = useState<Map<string, BookingRequest[]>>(
-    new Map()
+  const [dateBookings] = useState<Map<string, BookingRequest[]>>(
+    new Map([
+      ["Mon Jun 16 2025", [MOCK_BOOKINGS[0]]],
+      ["Tue Jul 01 2025", [MOCK_BOOKINGS[1]]],
+    ])
   );
-  const [, setFetchLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    if (user?.uid && !loading) {
-      fetchBookings();
-    }
-  }, [user?.uid, loading]);
-
-  const fetchBookings = async () => {
-    try {
-      setFetchLoading(true);
-      const month = currentDate.getMonth();
-      const year = currentDate.getFullYear();
-
-      const response = await fetch(
-        `/api/bookings/by-provider?providerId=${user?.uid}&month=${month}&year=${year}`
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Organize bookings by date
-        const bookingsByDate = new Map<string, BookingRequest[]>();
-        data.forEach((booking: BookingRequest) => {
-          const dateKey = new Date(booking.eventDate).toDateString();
-          if (!bookingsByDate.has(dateKey)) {
-            bookingsByDate.set(dateKey, []);
-          }
-          bookingsByDate.get(dateKey)!.push(booking);
-        });
-        setDateBookings(bookingsByDate);
-      }
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-    } finally {
-      setFetchLoading(false);
-    }
-  };
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -114,44 +108,16 @@ export default function ProviderCalendar() {
     }
   };
 
-  const handleAcceptBooking = async (bookingId: string) => {
-    try {
-      const response = await fetch("/api/bookings/update-status", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookingId,
-          status: "ACCEPTED",
-        }),
-      });
-
-      if (response.ok) {
-        fetchBookings();
-        setShowModal(false);
-      }
-    } catch (error) {
-      console.error("Error accepting booking:", error);
-    }
+  const handleAcceptBooking = (bookingId: string) => {
+    console.log("Accepting booking:", bookingId);
+    alert("Booking accepted (Demo)");
+    setShowModal(false);
   };
 
-  const handleRejectBooking = async (bookingId: string) => {
-    try {
-      const response = await fetch("/api/bookings/update-status", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookingId,
-          status: "REJECTED",
-        }),
-      });
-
-      if (response.ok) {
-        fetchBookings();
-        setShowModal(false);
-      }
-    } catch (error) {
-      console.error("Error rejecting booking:", error);
-    }
+  const handleRejectBooking = (bookingId: string) => {
+    console.log("Rejecting booking:", bookingId);
+    alert("Booking rejected (Demo)");
+    setShowModal(false);
   };
 
   const getDateStatus = (day: number) => {
@@ -188,14 +154,6 @@ export default function ProviderCalendar() {
   const selectedDateBookings = selectedDate
     ? dateBookings.get(selectedDate.toDateString()) || []
     : [];
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-white pb-24">
