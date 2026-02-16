@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  name                  String?
+  password              String
+  bio                   String?
+  avatar                String?
+  phone                 String?
+  address               String?
+  city                  String?
+  role                  String    @default("ATTENDEE")
+  hostApproved          Boolean   @default(false)
+  providerApproved      Boolean   @default(false)
+  passwordLockedUntil   DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  // Relations
+  events                Event[]
+  hostProfile           HostProfile?
+  providerProfile       ProviderProfile?
+  tickets               Ticket[]
+  reviews               Review[]
+  payments              Payment[]
+  bookingRequests       BookingRequest[]
+  sentMessages          Message[]  @relation("sender")
+  receivedMessages      Message[]  @relation("receiver")
+
+  @@index([email])
+}
+
+model Event {
+  id                    String    @id @default(cuid())
+  title                 String
+  description           String
+  image                 String?
+  startDate             DateTime
+  endDate               DateTime
+  location              String
+  city                  String
+  capacity              Int
+  ticketPrice           Float
+  status                String    @default("DRAFT")
+  selectedProviders     String    @default("")
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  // Relations
+  hostId                String
+  host                  User      @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  bookingRequests       BookingRequest[]
+  tickets               Ticket[]
+  reviews               Review[]
+  payments              Payment[]
+
+  @@index([hostId])
+  @@index([city])
+  @@index([status])
+}
+
+model Ticket {
+  id            String    @id @default(cuid())
+  qrCode        String    @unique
+  used          Boolean   @default(false)
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  eventId       String
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentId     String?
+  payment       Payment?  @relation(fields: [paymentId], references: [id])
+
+  @@index([eventId])
+  @@index([userId])
+  @@index([qrCode])
+}
+
+model Review {
+  id            String    @id @default(cuid())
+  rating        Int
+  comment       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  eventId       String
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([userId])
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  amount        Float
+  currency      String    @default("INR")
+  status        String    @default("PENDING")
+  razorpayId    String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  eventId       String
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tickets       Ticket[]
+
+  @@index([eventId])
+  @@index([userId])
+  @@index([razorpayId])
+}
+
+model HostProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName   String?
+  description   String?
+  website       String?
+  totalEvents   Int       @default(0)
+  totalRevenue  Float     @default(0)
+  averageRating Float     @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model ProviderProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      String
+  experience    Int       @default(0)
+  basePrice     Float     @default(0)
+  portfolio     String    @default("")
+  rating        Float     @default(0)
+  totalBookings Int       @default(0)
+  description   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([category])
+}
+
+model BookingRequest {
+  id                String    @id @default(cuid())
+  eventId           String
+  event             Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  providerId        String
+  provider          User      @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  offeredPrice      Float
+  status            String    @default("PENDING")
+  requestDate       DateTime  @default(now())
+  responseDate      DateTime?
+  eventDate         DateTime
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([eventId])
+  @@index([providerId])
+  @@index([status])
+  @@index([eventDate])
+}
+
+model Message {
+  id            String    @id @default(cuid())
+  senderId      String
+  sender        User      @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId    String
+  receiver      User      @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  content       String
+  whatsappUrl   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([senderId])
+  @@index([receiverId])
+}
